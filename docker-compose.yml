@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: devboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devboard
+      POSTGRES_PASSWORD: devboard
+      POSTGRES_DB: devboard
+    ports:
+      - '5432:5432'
+    volumes:
+      - devboard_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  devboard_postgres_data:

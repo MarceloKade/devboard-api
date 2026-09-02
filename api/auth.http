@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:3000
+
+
+### ========================================
+### AUTH
+### ========================================
+
+### Registrar Marcelo
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Marcelo",
+  "email": "marcelo@email.com",
+  "password": "12345678"
+}
+
+
+### Registrar Chrystian
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Chrystian",
+  "email": "chrys.kade@email.com",
+  "password": "12345678"
+}
+
+
+### Login Marcelo
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "marcelo@email.com",
+  "password": "12345678"
+}
+
+
+### Login Chrystian
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "chrys.kade@email.com",
+  "password": "12345678"
+}

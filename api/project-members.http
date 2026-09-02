@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3000
+@accessToken = {{accessToken}}
+@projectId = {{projectId}}
+@user2Id = {{user2Id}}
+@memberId = {{memberId}}
+
+
+### ========================================
+### PROJECT MEMBERS
+### ========================================
+
+### Listar membros do projeto
+GET {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{accessToken}}
+
+
+### Adicionar membro
+POST {{baseUrl}}/projects/{{projectId}}/members
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "userId": "{{user2Id}}",
+  "role": "MEMBER"
+}
+
+
+### Alterar papel do membro
+PATCH {{baseUrl}}/projects/{{projectId}}/members/{{memberId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+
+### Remover membro
+DELETE {{baseUrl}}/projects/{{projectId}}/members/{{memberId}}
+Authorization: Bearer {{accessToken}}

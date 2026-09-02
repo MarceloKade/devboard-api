@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:3000
+@accessToken = {{accessToken}}
+@projectId = {{projectId}}
+@taskId = {{taskId}}
+
+
+### ========================================
+### TASKS
+### ========================================
+
+### Criar task
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Implementar autenticação",
+  "description": "Criar login e registro usando JWT.",
+  "status": "TODO",
+  "priority": "HIGH"
+}
+
+
+### Listar tasks do projeto
+GET {{baseUrl}}/projects/{{projectId}}/tasks
+Authorization: Bearer {{accessToken}}
+
+
+### Buscar task
+GET {{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+
+
+### Atualizar task
+PATCH {{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS"
+}
+
+
+### Concluir task
+PATCH {{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "status": "DONE"
+}
+
+
+### Excluir task
+DELETE {{baseUrl}}/projects/{{projectId}}/tasks/{{taskId}}
+Authorization: Bearer {{accessToken}}

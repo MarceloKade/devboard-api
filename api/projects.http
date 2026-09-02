@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:3000
+@accessToken = {{accessToken}}
+@projectId = {{projectId}}
+
+
+### ========================================
+### PROJECTS
+### ========================================
+
+### Criar projeto
+POST {{baseUrl}}/projects
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "DevBoard",
+  "description": "Plataforma para gerenciamento de projetos."
+}
+
+
+### Listar meus projetos
+GET {{baseUrl}}/projects
+Authorization: Bearer {{accessToken}}
+
+
+### Buscar projeto
+GET {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{accessToken}}
+
+
+### Atualizar projeto
+PATCH {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "DevBoard API",
+  "description": "API para gerenciamento de projetos.",
+  "status": "ACTIVE"
+}
+
+
+### Excluir projeto
+DELETE {{baseUrl}}/projects/{{projectId}}
+Authorization: Bearer {{accessToken}}

@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:3000
+@accessToken = {{accessToken}}
+@userId = {{userId}}
+
+
+### ========================================
+### USERS
+### ========================================
+
+### Listar usuários
+GET {{baseUrl}}/users
+Authorization: Bearer {{accessToken}}
+
+
+### Buscar usuário autenticado
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+
+
+### Buscar usuário por ID
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+
+
+### Atualizar usuário
+PATCH {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Marcelo Cardoso Kade",
+  "avatar": "https://example.com/avatar.jpg"
+}
+
+
+### Excluir usuário
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{accessToken}}
