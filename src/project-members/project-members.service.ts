@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -57,10 +57,20 @@ export class ProjectMembersService {
       return null;
     }
 
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: addProjectMemberDto.email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
     return this.prisma.projectMember.create({
       data: {
         projectId,
-        userId: addProjectMemberDto.userId,
+        userId: user.id,
         role: addProjectMemberDto.role,
       },
       include: {

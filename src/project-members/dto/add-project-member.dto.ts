@@ -1,10 +1,9 @@
-import { IsIn, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsIn } from 'class-validator';
 
 export class AddProjectMemberDto {
-  @IsUUID()
-  userId: string;
+  @IsEmail()
+  email: string;
 
-  @IsString()
   @IsIn(['ADMIN', 'MEMBER'])
   role: string;
 }
