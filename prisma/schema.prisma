@@ -17,6 +17,7 @@ model User {
 
   projects    Project[]
   memberships ProjectMember[]
+  activities  ProjectActivity[]
 }
 
 model Project {
@@ -28,9 +29,10 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner   User            @relation(fields: [ownerId], references: [id])
-  tasks   Task[]
-  members ProjectMember[]
+  owner      User              @relation(fields: [ownerId], references: [id])
+  tasks      Task[]
+  members    ProjectMember[]
+  activities ProjectActivity[]
 
   @@index([ownerId])
 }
@@ -63,4 +65,20 @@ model Task {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
+}
+
+model ProjectActivity {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([createdAt])
 }
