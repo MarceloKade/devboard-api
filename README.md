@@ -1,98 +1,248 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DevBoard API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST do **DevBoard**, uma aplicação para gerenciamento de projetos, tarefas e membros de equipe.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+O backend foi desenvolvido com NestJS, Prisma e PostgreSQL, utilizando autenticação baseada em JWT.
 
-## Description
+## Tecnologias
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- NestJS
+- TypeScript
+- Prisma
+- PostgreSQL
+- JWT
+- bcrypt
+- class-validator
+- Docker
 
-## Project setup
+## Funcionalidades
 
-```bash
-$ npm install
+- Cadastro de usuários
+- Login com autenticação JWT
+- Consulta e atualização de perfil
+- Criação, edição, consulta e exclusão de projetos
+- Criação, edição, consulta e exclusão de tarefas
+- Controle de status e prioridade das tarefas
+- Gerenciamento de membros dos projetos
+- Controle de roles dos membros
+- Histórico de atividades dos projetos
+- Proteção das rotas com JWT
+
+## Estrutura do projeto
+
+```text
+src/
+├── auth/
+├── prisma/
+├── users/
+├── projects/
+├── tasks/
+├── project-members/
+├── project-activities/
+├── app.module.ts
+└── main.ts
 ```
 
-## Compile and run the project
+## Requisitos
+
+Antes de executar o projeto, é necessário ter instalado:
+
+- Node.js 22+
+- Docker
+- Git
+
+## Instalação
+
+Clone o repositório:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/MarceloKade/devboard-api.git
 ```
 
-## Run tests
+Entre na pasta:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd devboard-api
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Instale as dependências:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Variáveis de ambiente
 
-## Resources
+Crie um arquivo `.env` na raiz do projeto:
 
-Check out a few resources that may come in handy when working with NestJS:
+```env
+DATABASE_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+JWT_SECRET="devboard-super-secret-key-change-this-later"
 
-## Support
+BASE_URL="http://localhost:3001"
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+ACCESS_TOKEN=""
+ACCESS_TOKEN2=""
 
-## Stay in touch
+USER_ID=""
+USER2_ID=""
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+PROJECT_ID=""
+TASK_ID=""
 
-## License
+MEMBER_ID=""
+MEMBER2_ID=""
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+As variáveis `ACCESS_TOKEN`, `USER_ID`, `PROJECT_ID` e outras utilizadas pelos arquivos `.http` são auxiliares para facilitar os testes da API.
+
+## Banco de dados
+
+O projeto utiliza PostgreSQL.
+
+Para iniciar o banco utilizando Docker, execute:
+
+```bash
+docker compose up -d
+```
+
+Depois, execute as migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+Gere o Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+## Executando a aplicação
+
+Para iniciar o servidor em modo de desenvolvimento:
+
+```bash
+npm run start:dev
+```
+
+A API estará disponível em:
+
+```text
+http://localhost:3001
+```
+
+## Autenticação
+
+A API utiliza **JWT (JSON Web Token)** para autenticação.
+
+Primeiro, registre um usuário:
+
+```http
+POST /auth/register
+```
+
+Depois faça login:
+
+```http
+POST /auth/login
+```
+
+O login retorna um access token que deve ser enviado nas requisições protegidas:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+## Principais endpoints
+
+### Auth
+
+```text
+POST   /auth/register
+POST   /auth/login
+```
+
+### Users
+
+```text
+GET    /users
+GET    /users/me
+GET    /users/:id
+PATCH  /users/:id
+DELETE /users/:id
+```
+
+### Projects
+
+```text
+POST   /projects
+GET    /projects
+GET    /projects/:id
+PATCH  /projects/:id
+DELETE /projects/:id
+```
+
+### Tasks
+
+```text
+POST   /projects/:projectId/tasks
+GET    /projects/:projectId/tasks
+GET    /projects/:projectId/tasks/:taskId
+PATCH  /projects/:projectId/tasks/:taskId
+DELETE /projects/:projectId/tasks/:taskId
+```
+
+### Project Members
+
+```text
+POST   /projects/:projectId/members
+GET    /projects/:projectId/members
+PATCH  /projects/:projectId/members/:memberId
+DELETE /projects/:projectId/members/:memberId
+```
+
+### Project Activities
+
+```text
+GET /projects/:projectId/activities
+```
+
+O histórico registra ações realizadas no projeto, como:
+
+- criação e atualização de projetos;
+- criação, alteração e exclusão de tarefas;
+- alteração de status e prioridade;
+- adição, alteração e remoção de membros.
+
+## Testando a API
+
+O projeto possui arquivos `.http` para facilitar os testes das rotas:
+
+```text
+api/
+├── auth.http
+├── users.http
+├── projects.http
+├── tasks.http
+├── project-members.http
+└── project-activities.http
+```
+
+Eles podem ser executados diretamente pelo suporte de requisições HTTP da IDE.
+
+## Frontend
+
+O frontend do DevBoard foi desenvolvido separadamente utilizando React e TanStack Start.
+
+Repositório:
+
+https://github.com/MarceloKade/devboard-web
+
+## Autor
+
+**Marcelo Kade**
+
+- GitHub: https://github.com/MarceloKade
+- LinkedIn: https://www.linkedin.com/in/marcelokade/
