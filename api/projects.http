@@ -1,6 +1,6 @@
-@baseUrl = http://localhost:3000
-@accessToken = {{accessToken}}
-@projectId = {{projectId}}
+@baseUrl = {{$dotenv BASE_URL}}
+@accessToken = {{$dotenv ACCESS_TOKEN}}
+@projectId = {{$dotenv PROJECT_ID}}
 
 
 ### ========================================

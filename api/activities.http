@@ -1,0 +1,12 @@
+@baseUrl = {{$dotenv BASE_URL}}
+@accessToken = {{$dotenv ACCESS_TOKEN}}
+@projectId = {{$dotenv PROJECT_ID}}
+
+
+### ========================================
+### PROJECT ACTIVITIES
+### ========================================
+
+### Listar atividades do projeto
+GET {{baseUrl}}/projects/{{projectId}}/activities
+Authorization: Bearer {{accessToken}}

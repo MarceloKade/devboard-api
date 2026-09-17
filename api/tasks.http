@@ -1,7 +1,7 @@
-@baseUrl = http://localhost:3000
-@accessToken = {{accessToken}}
-@projectId = {{projectId}}
-@taskId = {{taskId}}
+@baseUrl = {{$dotenv BASE_URL}}
+@accessToken = {{$dotenv ACCESS_TOKEN}}
+@projectId = {{$dotenv PROJECT_ID}}
+@taskId = {{$dotenv TASK_ID}}
 
 
 ### ========================================
@@ -37,7 +37,7 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "status": "IN_PROGRESS"
+  "status": "DONE"
 }
 
 

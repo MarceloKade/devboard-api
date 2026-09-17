@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:3001
 @accessToken = {{accessToken}}
 @projectId = {{projectId}}
 @user2Id = {{user2Id}}
