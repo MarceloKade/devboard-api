@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EmailService } from './email.service';
 import { EmailVerificationService } from './email-verification.service';
+import { EmailVerificationCleanupService } from './email-verification-cleanup.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -22,6 +23,12 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, EmailService, EmailVerificationService, JwtStrategy],
+  providers: [
+    AuthService,
+    EmailService,
+    EmailVerificationService,
+    EmailVerificationCleanupService,
+    JwtStrategy,
+  ],
 })
 export class AuthModule {}
