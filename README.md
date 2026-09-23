@@ -2,7 +2,7 @@
 
 API REST do **DevBoard**, uma aplicação para gerenciamento de projetos, tarefas e membros de equipe.
 
-O backend foi desenvolvido com NestJS, Prisma e PostgreSQL, utilizando autenticação baseada em JWT.
+O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando autenticação baseada em **JWT** e verificação de e-mail através do **Resend**.
 
 ## Tecnologias
 
@@ -12,12 +12,19 @@ O backend foi desenvolvido com NestJS, Prisma e PostgreSQL, utilizando autentica
 - PostgreSQL
 - JWT
 - bcrypt
-- class-validator
+- Schedule
+- Resend
 - Docker
 
 ## Funcionalidades
 
 - Cadastro de usuários
+- Validação de e-mail no cadastro
+- Envio de e-mail de confirmação
+- Confirmação de e-mail através de link
+- Link de confirmação válido por 48 horas
+- Bloqueio de login para usuários não verificados
+- Exclusão automática de contas não verificadas após a expiração
 - Login com autenticação JWT
 - Consulta e atualização de perfil
 - Criação, edição, consulta e exclusão de projetos
@@ -32,13 +39,14 @@ O backend foi desenvolvido com NestJS, Prisma e PostgreSQL, utilizando autentica
 
 ```text
 src/
+
 ├── auth/
 ├── prisma/
-├── users/
+├── project-activities/
+├── project-members/
 ├── projects/
 ├── tasks/
-├── project-members/
-├── project-activities/
+├── users/
 ├── app.module.ts
 └── main.ts
 ```
@@ -78,36 +86,57 @@ Crie um arquivo `.env` na raiz do projeto:
 ```env
 DATABASE_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
 
+DIRECT_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
+
 JWT_SECRET="devboard-super-secret-key-change-this-later"
 
 BASE_URL="http://localhost:3001"
 
+FRONTEND_URL="http://localhost:3000"
+
+RESEND_API_KEY=""
+
 ACCESS_TOKEN=""
+
 ACCESS_TOKEN2=""
 
 USER_ID=""
+
 USER2_ID=""
 
 PROJECT_ID=""
+
 TASK_ID=""
 
 MEMBER_ID=""
+
 MEMBER2_ID=""
 ```
 
+### Variáveis principais
+
+- `DATABASE_URL` — conexão utilizada pela aplicação com o PostgreSQL.
+- `DIRECT_URL` — conexão direta utilizada pelo Prisma para operações relacionadas às migrations.
+- `JWT_SECRET` — chave utilizada para assinatura dos tokens JWT.
+- `BASE_URL` — URL da API.
+- `FRONTEND_URL` — URL do frontend utilizada nos links de confirmação de e-mail.
+- `RESEND_API_KEY` — chave da API do Resend utilizada para envio dos e-mails.
+
 As variáveis `ACCESS_TOKEN`, `USER_ID`, `PROJECT_ID` e outras utilizadas pelos arquivos `.http` são auxiliares para facilitar os testes da API.
+
+> Nunca versione o arquivo `.env` ou exponha chaves secretas no repositório.
 
 ## Banco de dados
 
 O projeto utiliza PostgreSQL.
 
-Para iniciar o banco utilizando Docker, execute:
+Para iniciar o banco utilizando Docker:
 
 ```bash
 docker compose up -d
 ```
 
-Depois, execute as migrations:
+Execute as migrations:
 
 ```bash
 npx prisma migrate dev
@@ -133,6 +162,34 @@ A API estará disponível em:
 http://localhost:3001
 ```
 
+## Verificação de e-mail
+
+Após o cadastro, o usuário recebe um e-mail de confirmação através do **Resend**.
+
+O fluxo funciona da seguinte forma:
+
+```text
+Cadastro
+   ↓
+Usuário criado como não verificado
+   ↓
+Token de verificação gerado
+   ↓
+E-mail enviado pelo Resend
+   ↓
+Usuário acessa o link
+   ↓
+E-mail confirmado
+   ↓
+Login liberado
+```
+
+O token de confirmação possui validade de **48 horas**.
+
+Caso o usuário não confirme o e-mail dentro desse período, a conta é removida automaticamente pelo serviço de limpeza agendada.
+
+A limpeza é executada periodicamente pelo sistema de tarefas agendadas do NestJS.
+
 ## Autenticação
 
 A API utiliza **JWT (JSON Web Token)** para autenticação.
@@ -143,7 +200,7 @@ Primeiro, registre um usuário:
 POST /auth/register
 ```
 
-Depois faça login:
+Depois de confirmar o e-mail, faça login:
 
 ```http
 POST /auth/login
@@ -155,13 +212,16 @@ O login retorna um access token que deve ser enviado nas requisições protegida
 Authorization: Bearer <access_token>
 ```
 
+Usuários que ainda não confirmaram o e-mail não podem realizar login.
+
 ## Principais endpoints
 
 ### Auth
 
 ```text
-POST   /auth/register
-POST   /auth/login
+POST /auth/register
+POST /auth/login
+GET  /auth/verify-email?token=<token>
 ```
 
 ### Users
@@ -222,23 +282,16 @@ O projeto possui arquivos `.http` para facilitar os testes das rotas:
 
 ```text
 api/
+
 ├── auth.http
-├── users.http
+└── project-activities.http
+├── project-members.http
 ├── projects.http
 ├── tasks.http
-├── project-members.http
-└── project-activities.http
+├── users.http
 ```
 
 Eles podem ser executados diretamente pelo suporte de requisições HTTP da IDE.
-
-## Frontend
-
-O frontend do DevBoard foi desenvolvido separadamente utilizando React e TanStack Start.
-
-Repositório:
-
-https://github.com/MarceloKade/devboard-web
 
 ## Autor
 
