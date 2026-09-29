@@ -16,7 +16,18 @@ export class ProjectsService {
   async findAll(ownerId: string) {
     return this.prisma.project.findMany({
       where: {
-        ownerId,
+        OR: [
+          {
+            ownerId,
+          },
+          {
+            members: {
+              some: {
+                userId: ownerId,
+              },
+            },
+          },
+        ],
       },
       orderBy: {
         createdAt: 'desc',
@@ -28,7 +39,18 @@ export class ProjectsService {
     return this.prisma.project.findFirst({
       where: {
         id,
-        ownerId,
+        OR: [
+          {
+            ownerId,
+          },
+          {
+            members: {
+              some: {
+                userId: ownerId,
+              },
+            },
+          },
+        ],
       },
     });
   }

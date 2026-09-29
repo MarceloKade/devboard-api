@@ -13,19 +13,57 @@ export class TasksService {
     private readonly projectActivitiesService: ProjectActivitiesService,
   ) {}
 
-  async create(
-    projectId: string,
-    ownerId: string,
-    createTaskDto: CreateTaskDto,
-  ) {
+  private async getProjectAccess(projectId: string, userId: string) {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
-        ownerId,
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        ownerId: true,
+        members: {
+          where: {
+            userId,
+          },
+          select: {
+            role: true,
+          },
+        },
       },
     });
 
     if (!project) {
+      return null;
+    }
+
+    const isOwner = project.ownerId === userId;
+    const isAdmin =
+      isOwner || project.members.some((member) => member.role === 'ADMIN');
+
+    return {
+      isAdmin,
+    };
+  }
+
+  async create(
+    projectId: string,
+    userId: string,
+    createTaskDto: CreateTaskDto,
+  ) {
+    const access = await this.getProjectAccess(projectId, userId);
+
+    if (!access) {
       return null;
     }
 
@@ -36,13 +74,13 @@ export class TasksService {
         status: createTaskDto.status,
         priority: createTaskDto.priority,
         projectId,
-        createdById: ownerId,
+        createdById: userId,
       },
     });
 
     await this.projectActivitiesService.create(
       projectId,
-      ownerId,
+      userId,
       'TASK_CREATED',
       `Criou a task "${task.title}"`,
     );
@@ -50,15 +88,10 @@ export class TasksService {
     return task;
   }
 
-  async findAll(projectId: string, ownerId: string) {
-    const project = await this.prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
-      },
-    });
+  async findAll(projectId: string, userId: string) {
+    const access = await this.getProjectAccess(projectId, userId);
 
-    if (!project) {
+    if (!access) {
       return null;
     }
 
@@ -79,13 +112,23 @@ export class TasksService {
     });
   }
 
-  async findOne(projectId: string, taskId: string, ownerId: string) {
+  async findOne(projectId: string, taskId: string, userId: string) {
+    const access = await this.getProjectAccess(projectId, userId);
+
+    if (!access) {
+      return null;
+    }
+
     return this.prisma.task.findFirst({
       where: {
         id: taskId,
         projectId,
-        project: {
-          ownerId,
+      },
+      include: {
+        createdBy: {
+          select: {
+            avatar: true,
+          },
         },
       },
     });
@@ -94,12 +137,29 @@ export class TasksService {
   async update(
     projectId: string,
     taskId: string,
-    ownerId: string,
+    userId: string,
     updateTaskDto: UpdateTaskDto,
   ) {
-    const task = await this.findOne(projectId, taskId, ownerId);
+    const access = await this.getProjectAccess(projectId, userId);
+
+    if (!access) {
+      return null;
+    }
+
+    const task = await this.prisma.task.findFirst({
+      where: {
+        id: taskId,
+        projectId,
+      },
+    });
 
     if (!task) {
+      return null;
+    }
+
+    const canEdit = access.isAdmin || task.createdById === userId;
+
+    if (!canEdit) {
       return null;
     }
 
@@ -108,12 +168,19 @@ export class TasksService {
         id: taskId,
       },
       data: updateTaskDto,
+      include: {
+        createdBy: {
+          select: {
+            avatar: true,
+          },
+        },
+      },
     });
 
     if (updateTaskDto.status && updateTaskDto.status !== task.status) {
       await this.projectActivitiesService.create(
         projectId,
-        ownerId,
+        userId,
         'TASK_STATUS_CHANGED',
         `Alterou o status da task "${updatedTask.title}" de ${task.status} para ${updatedTask.status}`,
       );
@@ -122,7 +189,7 @@ export class TasksService {
     if (updateTaskDto.priority && updateTaskDto.priority !== task.priority) {
       await this.projectActivitiesService.create(
         projectId,
-        ownerId,
+        userId,
         'TASK_PRIORITY_CHANGED',
         `Alterou a prioridade da task "${updatedTask.title}" de ${task.priority} para ${updatedTask.priority}`,
       );
@@ -131,7 +198,7 @@ export class TasksService {
     if (updateTaskDto.title && updateTaskDto.title !== task.title) {
       await this.projectActivitiesService.create(
         projectId,
-        ownerId,
+        userId,
         'TASK_TITLE_CHANGED',
         `Alterou o título da task de "${task.title}" para "${updatedTask.title}"`,
       );
@@ -143,7 +210,7 @@ export class TasksService {
     ) {
       await this.projectActivitiesService.create(
         projectId,
-        ownerId,
+        userId,
         'TASK_DESCRIPTION_CHANGED',
         `Alterou a descrição da task "${updatedTask.title}"`,
       );
@@ -152,8 +219,19 @@ export class TasksService {
     return updatedTask;
   }
 
-  async remove(projectId: string, taskId: string, ownerId: string) {
-    const task = await this.findOne(projectId, taskId, ownerId);
+  async remove(projectId: string, taskId: string, userId: string) {
+    const access = await this.getProjectAccess(projectId, userId);
+
+    if (!access || !access.isAdmin) {
+      return null;
+    }
+
+    const task = await this.prisma.task.findFirst({
+      where: {
+        id: taskId,
+        projectId,
+      },
+    });
 
     if (!task) {
       return null;
@@ -161,7 +239,7 @@ export class TasksService {
 
     await this.projectActivitiesService.create(
       projectId,
-      ownerId,
+      userId,
       'TASK_DELETED',
       `Excluiu a task "${task.title}"`,
     );

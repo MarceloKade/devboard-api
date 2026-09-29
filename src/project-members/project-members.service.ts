@@ -13,11 +13,45 @@ export class ProjectMembersService {
     private readonly projectActivitiesService: ProjectActivitiesService,
   ) {}
 
-  async findAll(projectId: string, ownerId: string) {
+  private async hasAdminAccess(projectId: string, userId: string) {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
-        ownerId,
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+                role: 'ADMIN',
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    return !!project;
+  }
+
+  async findAll(projectId: string, userId: string) {
+    const project = await this.prisma.project.findFirst({
+      where: {
+        id: projectId,
+        OR: [
+          {
+            ownerId: userId,
+          },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
       },
     });
 
@@ -47,17 +81,12 @@ export class ProjectMembersService {
 
   async add(
     projectId: string,
-    ownerId: string,
+    userId: string,
     addProjectMemberDto: AddProjectMemberDto,
   ) {
-    const project = await this.prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
-      },
-    });
+    const hasAccess = await this.hasAdminAccess(projectId, userId);
 
-    if (!project) {
+    if (!hasAccess) {
       return null;
     }
 
@@ -91,7 +120,7 @@ export class ProjectMembersService {
 
     await this.projectActivitiesService.create(
       projectId,
-      ownerId,
+      userId,
       'MEMBER_ADDED',
       `Adicionou ${user.name} ao projeto`,
     );
@@ -102,17 +131,12 @@ export class ProjectMembersService {
   async update(
     projectId: string,
     memberId: string,
-    ownerId: string,
+    userId: string,
     updateProjectMemberDto: UpdateProjectMemberDto,
   ) {
-    const project = await this.prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
-      },
-    });
+    const hasAccess = await this.hasAdminAccess(projectId, userId);
 
-    if (!project) {
+    if (!hasAccess) {
       return null;
     }
 
@@ -159,7 +183,7 @@ export class ProjectMembersService {
     if (member.role !== updatedMember.role) {
       await this.projectActivitiesService.create(
         projectId,
-        ownerId,
+        userId,
         'MEMBER_ROLE_CHANGED',
         `Alterou a role de ${member.user.name} de ${member.role} para ${updatedMember.role}`,
       );
@@ -168,15 +192,10 @@ export class ProjectMembersService {
     return updatedMember;
   }
 
-  async remove(projectId: string, memberId: string, ownerId: string) {
-    const project = await this.prisma.project.findFirst({
-      where: {
-        id: projectId,
-        ownerId,
-      },
-    });
+  async remove(projectId: string, memberId: string, userId: string) {
+    const hasAccess = await this.hasAdminAccess(projectId, userId);
 
-    if (!project) {
+    if (!hasAccess) {
       return null;
     }
 
@@ -200,7 +219,7 @@ export class ProjectMembersService {
 
     await this.projectActivitiesService.create(
       projectId,
-      ownerId,
+      userId,
       'MEMBER_REMOVED',
       `Removeu ${member.user.name} do projeto`,
     );

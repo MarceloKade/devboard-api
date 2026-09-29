@@ -2,7 +2,7 @@
 
 API REST do **DevBoard**, uma aplicação para gerenciamento de projetos, tarefas e membros de equipe.
 
-O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando autenticação baseada em **JWT**, verificação de e-mail através do **Resend** e armazenamento de avatares através do **Supabase Storage**.
+O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando autenticação baseada em **JWT**, verificação de e-mail através de **Gmail SMTP com Nodemailer** e armazenamento de avatares através do **Supabase Storage**.
 
 ## Tecnologias
 
@@ -13,7 +13,7 @@ O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando auten
 - JWT
 - bcrypt
 - Schedule
-- Resend
+- Nodemailer
 - Supabase Storage
 - Docker
 
@@ -88,22 +88,40 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
+
 DIRECT_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
+
 JWT_SECRET="devboard-super-secret-key-change-this-later"
+
 BASE_URL="http://localhost:3001"
+
 FRONTEND_URL="http://localhost:3000"
 
-RESEND_API_KEY=""
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT="465"
+EMAIL_SECURE="true"
+EMAIL_USER="seu-email@gmail.com"
+EMAIL_PASSWORD="sua-senha-de-app"
+EMAIL_FROM="DevBoard <seu-email@gmail.com>"
+
 SUPABASE_URL=""
+
 SUPABASE_SECRET_KEY=""
 
 ACCESS_TOKEN=""
+
 ACCESS_TOKEN2=""
+
 USER_ID=""
+
 USER2_ID=""
+
 PROJECT_ID=""
+
 TASK_ID=""
+
 MEMBER_ID=""
+
 MEMBER2_ID=""
 ```
 
@@ -114,7 +132,12 @@ MEMBER2_ID=""
 - `JWT_SECRET` — chave utilizada para assinatura dos tokens JWT.
 - `BASE_URL` — URL da API.
 - `FRONTEND_URL` — URL do frontend utilizada nos links de confirmação de e-mail.
-- `RESEND_API_KEY` — chave da API do Resend utilizada para envio dos e-mails.
+- `EMAIL_HOST` — servidor SMTP utilizado para envio dos e-mails.
+- `EMAIL_PORT` — porta utilizada pelo servidor SMTP.
+- `EMAIL_SECURE` — define o uso de conexão SMTP segura.
+- `EMAIL_USER` — endereço de e-mail utilizado para envio.
+- `EMAIL_PASSWORD` — senha de app utilizada para autenticação SMTP.
+- `EMAIL_FROM` — remetente exibido nos e-mails enviados.
 - `SUPABASE_URL` — URL do projeto Supabase utilizado para armazenamento dos arquivos.
 - `SUPABASE_SECRET_KEY` — chave secreta utilizada pelo backend para acessar o Supabase Storage.
 
@@ -174,23 +197,35 @@ http://localhost:3001
 
 ## Verificação de e-mail
 
-Após o cadastro, o usuário recebe um e-mail de confirmação através do **Resend**.
+Após o cadastro, o usuário recebe um e-mail de confirmação enviado através do **Gmail SMTP utilizando Nodemailer**.
 
 O fluxo funciona da seguinte forma:
 
 ```text
 Cadastro
+
    ↓
+
 Usuário criado como não verificado
+
    ↓
+
 Token de verificação gerado
+
    ↓
-E-mail enviado pelo Resend
+
+E-mail enviado pelo Gmail SMTP
+
    ↓
+
 Usuário acessa o link
+
    ↓
+
 E-mail confirmado
+
    ↓
+
 Login liberado
 ```
 
@@ -230,6 +265,7 @@ Usuários que ainda não confirmaram o e-mail não podem realizar login.
 
 ```text
 POST /auth/register
+
 POST /auth/login
 
 GET  /auth/verify-email?token=<token>
@@ -239,10 +275,13 @@ GET  /auth/verify-email?token=<token>
 
 ```text
 GET    /users
+
 GET    /users/me
+
 GET    /users/:id
 
 PATCH  /users/:id
+
 PATCH  /users/me/avatar
 
 DELETE /users/:id
@@ -266,6 +305,7 @@ avatar
 POST   /projects
 
 GET    /projects
+
 GET    /projects/:id
 
 PATCH  /projects/:id
@@ -279,6 +319,7 @@ DELETE /projects/:id
 POST   /projects/:projectId/tasks
 
 GET    /projects/:projectId/tasks
+
 GET    /projects/:projectId/tasks/:taskId
 
 PATCH  /projects/:projectId/tasks/:taskId
