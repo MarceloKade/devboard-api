@@ -6,14 +6,21 @@ import {
   Param,
   Patch,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import type { Request } from 'express';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 import { UpdateUserDto } from './dto/update-user.dto';
+
+import { SupabaseStorageService } from './supabase-storage.service';
+
 import { UsersService } from './users.service';
 
 type AuthenticatedRequest = Request & {
@@ -25,7 +32,10 @@ type AuthenticatedRequest = Request & {
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly supabaseStorageService: SupabaseStorageService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -47,8 +57,35 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    }),
+  )
+  async updateAvatar(
+    @Req() request: AuthenticatedRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const avatarUrl = await this.supabaseStorageService.uploadAvatar(
+      request.user.userId,
+      file,
+    );
+
+    return this.usersService.update(request.user.userId, {
+      avatar: avatarUrl,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
