@@ -52,6 +52,16 @@ export class ProjectsService {
           },
         ],
       },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+      },
     });
   }
 
