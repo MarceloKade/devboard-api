@@ -2,7 +2,7 @@
 
 API REST do **DevBoard**, uma aplicação para gerenciamento de projetos, tarefas e membros de equipe.
 
-O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando autenticação baseada em **JWT** e verificação de e-mail através do **Resend**.
+O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando autenticação baseada em **JWT**, verificação de e-mail através do **Resend** e armazenamento de avatares através do **Supabase Storage**.
 
 ## Tecnologias
 
@@ -14,6 +14,7 @@ O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando auten
 - bcrypt
 - Schedule
 - Resend
+- Supabase Storage
 - Docker
 
 ## Funcionalidades
@@ -27,6 +28,8 @@ O backend foi desenvolvido com **NestJS, Prisma e PostgreSQL**, utilizando auten
 - Exclusão automática de contas não verificadas após a expiração
 - Login com autenticação JWT
 - Consulta e atualização de perfil
+- Upload de avatar
+- Armazenamento de avatar utilizando Supabase Storage
 - Criação, edição, consulta e exclusão de projetos
 - Criação, edição, consulta e exclusão de tarefas
 - Controle de status e prioridade das tarefas
@@ -85,31 +88,22 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
-
 DIRECT_URL="postgresql://devboard:devboard@localhost:5432/devboard?schema=public"
-
 JWT_SECRET="devboard-super-secret-key-change-this-later"
-
 BASE_URL="http://localhost:3001"
-
 FRONTEND_URL="http://localhost:3000"
 
 RESEND_API_KEY=""
+SUPABASE_URL=""
+SUPABASE_SECRET_KEY=""
 
 ACCESS_TOKEN=""
-
 ACCESS_TOKEN2=""
-
 USER_ID=""
-
 USER2_ID=""
-
 PROJECT_ID=""
-
 TASK_ID=""
-
 MEMBER_ID=""
-
 MEMBER2_ID=""
 ```
 
@@ -121,6 +115,8 @@ MEMBER2_ID=""
 - `BASE_URL` — URL da API.
 - `FRONTEND_URL` — URL do frontend utilizada nos links de confirmação de e-mail.
 - `RESEND_API_KEY` — chave da API do Resend utilizada para envio dos e-mails.
+- `SUPABASE_URL` — URL do projeto Supabase utilizado para armazenamento dos arquivos.
+- `SUPABASE_SECRET_KEY` — chave secreta utilizada pelo backend para acessar o Supabase Storage.
 
 As variáveis `ACCESS_TOKEN`, `USER_ID`, `PROJECT_ID` e outras utilizadas pelos arquivos `.http` são auxiliares para facilitar os testes da API.
 
@@ -147,6 +143,20 @@ Gere o Prisma Client:
 ```bash
 npx prisma generate
 ```
+
+## Supabase Storage
+
+Os avatares dos usuários são armazenados no **Supabase Storage**.
+
+O backend utiliza um bucket chamado `avatars` para armazenar as imagens.
+
+As imagens possuem limite de **5 MB** e os formatos aceitos são:
+
+- JPEG
+- PNG
+- WEBP
+
+Após o upload, o backend gera a URL pública do arquivo e salva essa URL no campo `avatar` do usuário.
 
 ## Executando a aplicação
 
@@ -221,6 +231,7 @@ Usuários que ainda não confirmaram o e-mail não podem realizar login.
 ```text
 POST /auth/register
 POST /auth/login
+
 GET  /auth/verify-email?token=<token>
 ```
 
@@ -230,17 +241,35 @@ GET  /auth/verify-email?token=<token>
 GET    /users
 GET    /users/me
 GET    /users/:id
+
 PATCH  /users/:id
+PATCH  /users/me/avatar
+
 DELETE /users/:id
+```
+
+O endpoint de avatar recebe uma imagem através de `multipart/form-data`:
+
+```text
+PATCH /users/me/avatar
+```
+
+Campo do arquivo:
+
+```text
+avatar
 ```
 
 ### Projects
 
 ```text
 POST   /projects
+
 GET    /projects
 GET    /projects/:id
+
 PATCH  /projects/:id
+
 DELETE /projects/:id
 ```
 
@@ -248,9 +277,12 @@ DELETE /projects/:id
 
 ```text
 POST   /projects/:projectId/tasks
+
 GET    /projects/:projectId/tasks
 GET    /projects/:projectId/tasks/:taskId
+
 PATCH  /projects/:projectId/tasks/:taskId
+
 DELETE /projects/:projectId/tasks/:taskId
 ```
 
@@ -258,8 +290,11 @@ DELETE /projects/:projectId/tasks/:taskId
 
 ```text
 POST   /projects/:projectId/members
+
 GET    /projects/:projectId/members
+
 PATCH  /projects/:projectId/members/:memberId
+
 DELETE /projects/:projectId/members/:memberId
 ```
 
@@ -284,11 +319,11 @@ O projeto possui arquivos `.http` para facilitar os testes das rotas:
 api/
 
 ├── auth.http
-└── project-activities.http
+├── project-activities.http
 ├── project-members.http
 ├── projects.http
 ├── tasks.http
-├── users.http
+└── users.http
 ```
 
 Eles podem ser executados diretamente pelo suporte de requisições HTTP da IDE.
