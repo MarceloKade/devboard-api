@@ -36,6 +36,7 @@ export class TasksService {
         status: createTaskDto.status,
         priority: createTaskDto.priority,
         projectId,
+        createdById: ownerId,
       },
     });
 
@@ -67,6 +68,13 @@ export class TasksService {
       },
       orderBy: {
         createdAt: 'desc',
+      },
+      include: {
+        createdBy: {
+          select: {
+            avatar: true,
+          },
+        },
       },
     });
   }

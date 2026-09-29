@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
+import nodemailer, { Transporter } from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-  private readonly resend: Resend;
+  private readonly transporter: Transporter;
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
   }
 
   async sendVerificationEmail(
@@ -16,8 +24,8 @@ export class EmailService {
   ) {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
-    await this.resend.emails.send({
-      from: 'DevBoard <onboarding@resend.dev>',
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
       to: email,
       subject: 'Confirme seu e-mail - DevBoard',
       html: `
