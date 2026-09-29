@@ -98,10 +98,15 @@ BASE_URL="http://localhost:3001"
 FRONTEND_URL="http://localhost:3000"
 
 EMAIL_HOST="smtp.gmail.com"
+
 EMAIL_PORT="465"
+
 EMAIL_SECURE="true"
+
 EMAIL_USER="seu-email@gmail.com"
+
 EMAIL_PASSWORD="sua-senha-de-app"
+
 EMAIL_FROM="DevBoard <seu-email@gmail.com>"
 
 SUPABASE_URL=""
@@ -203,29 +208,17 @@ O fluxo funciona da seguinte forma:
 
 ```text
 Cadastro
-
    ↓
-
 Usuário criado como não verificado
-
    ↓
-
 Token de verificação gerado
-
    ↓
-
 E-mail enviado pelo Gmail SMTP
-
    ↓
-
 Usuário acessa o link
-
    ↓
-
 E-mail confirmado
-
    ↓
-
 Login liberado
 ```
 
@@ -259,15 +252,27 @@ Authorization: Bearer <access_token>
 
 Usuários que ainda não confirmaram o e-mail não podem realizar login.
 
+## Aprendizados e decisões técnicas
+
+Durante o desenvolvimento do projeto, algumas decisões técnicas foram revistas conforme as necessidades da aplicação e as limitações das ferramentas utilizadas.
+
+### Envio de e-mails
+
+Inicialmente, o projeto utilizava o **Resend** para o envio dos e-mails de confirmação de cadastro.
+
+Durante os testes, foi identificada uma limitação do plano gratuito relacionada ao envio de e-mails para destinatários. Essa limitação não atendia ao fluxo de cadastro e verificação de e-mail da aplicação.
+
+Como alternativa, o envio foi migrado para **Gmail SMTP utilizando Nodemailer**.
+
+A mudança permitiu manter o fluxo de confirmação de e-mail funcionando e proporcionou experiência prática com configuração de SMTP, autenticação por senha de aplicativo, envio de e-mails pelo backend e gerenciamento de credenciais através de variáveis de ambiente.
+
 ## Principais endpoints
 
 ### Auth
 
 ```text
 POST /auth/register
-
 POST /auth/login
-
 GET  /auth/verify-email?token=<token>
 ```
 
@@ -275,15 +280,10 @@ GET  /auth/verify-email?token=<token>
 
 ```text
 GET    /users
-
 GET    /users/me
-
 GET    /users/:id
-
 PATCH  /users/:id
-
 PATCH  /users/me/avatar
-
 DELETE /users/:id
 ```
 
@@ -303,13 +303,9 @@ avatar
 
 ```text
 POST   /projects
-
 GET    /projects
-
 GET    /projects/:id
-
 PATCH  /projects/:id
-
 DELETE /projects/:id
 ```
 
@@ -317,13 +313,9 @@ DELETE /projects/:id
 
 ```text
 POST   /projects/:projectId/tasks
-
 GET    /projects/:projectId/tasks
-
 GET    /projects/:projectId/tasks/:taskId
-
 PATCH  /projects/:projectId/tasks/:taskId
-
 DELETE /projects/:projectId/tasks/:taskId
 ```
 
@@ -331,11 +323,8 @@ DELETE /projects/:projectId/tasks/:taskId
 
 ```text
 POST   /projects/:projectId/members
-
 GET    /projects/:projectId/members
-
 PATCH  /projects/:projectId/members/:memberId
-
 DELETE /projects/:projectId/members/:memberId
 ```
 
