@@ -76,6 +76,13 @@ export class TasksService {
         projectId,
         createdById: userId,
       },
+      include: {
+        createdBy: {
+          select: {
+            avatar: true,
+          },
+        },
+      },
     });
 
     await this.projectActivitiesService.create(
