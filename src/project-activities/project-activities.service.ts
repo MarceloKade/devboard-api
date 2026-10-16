@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -22,16 +22,30 @@ export class ProjectActivitiesService {
     });
   }
 
-  async findAll(projectId: string, ownerId: string) {
+  async findAll(projectId: string, userId: string) {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
-        ownerId,
+        OR: [
+          { ownerId: userId },
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
       },
     });
 
     if (!project) {
-      return null;
+      throw new NotFoundException(
+        'Projeto não encontrado ou você não tem acesso a ele.',
+      );
     }
 
     return this.prisma.projectActivity.findMany({
